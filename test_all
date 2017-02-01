@@ -1,0 +1,84 @@
+#!/bin/bash
+
+# init.mod modifications with runlmp module
+
+# Non-existent init template file check 
+#mv init0.mod init0temp.mod
+#rm -rf init0.mod
+#NiElastic.py
+
+# Various input parameter formats
+#test.py
+# print lines in init.mod that differ from init0.mod
+# *** regardless ordering 
+# -f init0.mod - for each line; treat the line as a plain string
+# -x - match the whole line
+# -v - print only lines that don't match
+#grep -F -x -v -f init00.mod init.mod 
+
+# Loop through all directories in RES_...
+# and verify if init.mod files are correct
+#for dir in /nfs/matsci-fserv/share/truszkoa/NiElastic/RES_2015-04-10/*/
+#do
+#    dir=${dir%*/}
+#    echo ${dir##*/} 
+#    # loop through each subdirectory
+#    # and check the init.mod files
+#    for subdir in $dir/*/
+#    do
+#        subdir=${subdir%*/}
+#        echo ${subdir##*/}
+#        cd $subdir
+#        grep -Fxvf init00.mod init.mod
+#        # pause to inspect the results
+#        read -rsp $'\n Press any key to continue...\n' -n 1 key 
+#    done
+#done
+
+# Command:
+# read -rsp $'\n Press any key to continue...\n' -n 1 key 
+# -r - raw mode, no combined characters like "\" or "^"
+# -s - silent mode, no need for keyboard output -- ?
+# -p - specifies the prompt $'prompt'
+# -n 1 - only needs a single character
+# key - in case one needs to know the inpyut, in n 1 that is
+#   the key that has been pressed  
+
+# Directory generation
+# Remove the old one
+#rm -rf RES_2015-04-11
+## run 
+#NiElastic.py
+## Print content
+#tree RES_2015-04-11/
+
+# Second and current usage of this block - check if and which jobs were
+# not completed on the cluster. 
+# Jobs that didn't complete will print with respective x/y/yz folder names
+# NiElastic.py has a couple extra lines to accomodate those
+# Not completed jobs are tracked by the absence of log.lammps file
+FILE=log.lammps
+# Loop through all directories and subdirectories and verify if the 
+# log.lammps output (data_out.txt) and log infor (log.out) are correct
+for dir in /nfs/matsci-fserv/share/truszkoa/NiAll/RES_2015-05-08/*/
+do
+    dir=${dir%*/}
+    echo ${dir##*/} 
+    # loop through each subdirectory
+    # and check the init.mod files
+    cd $dir
+    # If log.lammps not present print subdirectory name
+    if [ ! -f "$FILE" ];
+    then
+        echo No log ${dir##*/}
+            #tail data_out.txt
+            #echo " "
+            #tail log.out 
+            # pause to inspect the results
+            #read -rsp $'\n Press any key to continue...\n' -n 1 key
+   fi 
+done
+
+
+
+      

@@ -1,0 +1,50 @@
+#
+# LAMMPS program for simulating elastic deformation in Ni
+#
+# ----------------------------------------------------------------
+# Last modified: May  5  2015
+# ----------------------------------------------------------------
+# User intput: all changes to the program are input through python
+# driver script NiElastic.py
+# ----------------------------------------------------------------
+# Output: .xyz file for visualization, average properties from 
+# thermo in log.lammps file  
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #  
+
+# --- LAMMPS MODULES 
+# Modified by NiElastic.py
+# Simulation settings
+include init.mod
+# Interactions settings
+include potential.mod
+
+# --- VISUALIZATION DATA 
+# Data collection - for visualization
+dump	xmol all xyz 100 movie.xyz
+dump_modify	xmol element Fe Ni Cr
+
+# --- SAMPLE PREPARATION
+# Relax the structure at isotropic pressure of 1 bar and 0.0 K
+fix vb all box/relax iso 1.0 
+minimize ${etol} ${ftol} ${maxiter} ${maxeval}
+unfix vb
+# Generate an ensemble of velocities using a random number generator with 
+# the specified seed at the specified final temperature Tf
+variable 	2T equal ${T0}*2
+velocity 	all create ${2T} ${seed} rot yes mom yes dist gaussian
+# Base case - fix the box volume at given final temperature
+# Run NVT to stabilize the structure
+change_box all x final 0.0 ${af} y final 0.0 ${af} z final 0.0 ${af} remap
+fix 	therm all nvt temp ${Tf} ${Tf} ${Tdrag}	
+run 	${NHeat}
+unfix 	therm
+
+# --- DEFORMATION 
+# Final stage - deformation in x and xy using NVT
+fix 	xdf all deform 1 x erate 1.0e-4 xy erate 0.5e-4 remap v	
+fix 	therm all nvt/sllod temp ${Tf} ${Tf} ${Tdrag}
+run 	${NHeat}
+unfix 	therm
+unfix 	xdf
+quit
+
